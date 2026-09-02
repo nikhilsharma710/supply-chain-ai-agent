@@ -29,7 +29,7 @@ def main():
                         HumanMessage(content=user_input)
                     ]
                 },
-                config,
+                config
             )
 
             result = response['messages'][-1].content
