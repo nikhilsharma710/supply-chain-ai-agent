@@ -1,0 +1,92 @@
+[
+  {
+    "id": "inventory-available-sku-0023",
+    "question": "What is the available inventory for SKU-0023?",
+    "expected_facts": ["4670"],
+    "reference_answer": "SKU-0023 has 4853 on hand and 183 reserved, leaving 4670 available."
+  },
+  {
+    "id": "inventory-available-sku-0001",
+    "question": "How many units of SKU-0001 are on hand, and how many are available?",
+    "expected_facts": ["1087", "850"],
+    "reference_answer": "SKU-0001 has 1087 units on hand, 237 reserved, so 850 are available."
+  },
+  {
+    "id": "supplies-supplier-sku-0001",
+    "question": "Which supplier provides SKU-0001?",
+    "expected_facts": ["SUP-0002"],
+    "reference_answer": "SKU-0001 (Standard Resin) is supplied by SUP-0002."
+  },
+  {
+    "id": "supplies-reorder-point-sku-0009",
+    "question": "What is the reorder point for SKU-0009?",
+    "expected_facts": ["457"],
+    "reference_answer": "SKU-0009 has a reorder point of 457 units and a reorder quantity of 637."
+  },
+  {
+    "id": "supplies-components-count",
+    "question": "How many supplies are in the Components category?",
+    "expected_facts": ["6"],
+    "reference_answer": "Six supplies are in the Components category: SKU-0002, SKU-0008, SKU-0010, SKU-0020, SKU-0035 and SKU-0036."
+  },
+  {
+    "id": "supplies-unit-cost-sku-0040",
+    "question": "What is the unit cost of SKU-0040?",
+    "expected_facts": ["949.28"],
+    "reference_answer": "SKU-0040 (Standard Casing) has a unit cost of 949.28."
+  },
+  {
+    "id": "purchase-orders-cancelled-count",
+    "question": "How many purchase orders have been cancelled?",
+    "expected_facts": ["7"],
+    "reference_answer": "Seven purchase orders are cancelled: PO-0001, PO-0005, PO-0007, PO-0008, PO-0018, PO-0021 and PO-0024."
+  },
+  {
+    "id": "purchase-orders-for-sku-0002",
+    "question": "Which purchase orders are for SKU-0002?",
+    "expected_facts": ["PO-0003", "PO-0011"],
+    "reference_answer": "Two purchase orders are for SKU-0002: PO-0003 (pending, 3018 units) and PO-0011 (ordered, 2188 units)."
+  },
+  {
+    "id": "purchase-order-status-po-0002",
+    "question": "What is the status of purchase order PO-0002 and how much has been received?",
+    "expected_facts": ["partially_received", "1027"],
+    "reference_answer": "PO-0002 is partially_received: 1027 of the 1078 ordered units have arrived."
+  },
+  {
+    "id": "sales-orders-for-sku-0019",
+    "question": "List the sales orders for SKU-0019.",
+    "expected_facts": ["SO-0001", "SO-0023"],
+    "reference_answer": "Two sales orders reference SKU-0019: SO-0001 (processing) and SO-0023 (pending)."
+  },
+  {
+    "id": "sales-orders-shipped-count",
+    "question": "How many sales orders have a status of shipped?",
+    "expected_facts": ["11"],
+    "reference_answer": "Eleven sales orders are in the shipped status."
+  },
+  {
+    "id": "shipments-delayed-count",
+    "question": "How many shipments are currently delayed?",
+    "expected_facts": ["9"],
+    "reference_answer": "Nine shipments have the status delayed."
+  },
+  {
+    "id": "shipment-status-sh-0020",
+    "question": "What is the status of shipment SH-0020 and which purchase order does it fulfil?",
+    "expected_facts": ["delayed", "PO-0007"],
+    "reference_answer": "SH-0020 is an inbound shipment of SKU-0039 for purchase order PO-0007 and is delayed."
+  },
+  {
+    "id": "shipments-for-sku-0032",
+    "question": "Which shipments are associated with SKU-0032?",
+    "expected_facts": ["SH-0004", "SH-0011", "SH-0021", "SH-0030"],
+    "reference_answer": "Four shipments involve SKU-0032: SH-0004, SH-0011, SH-0021 and SH-0030."
+  },
+  {
+    "id": "no-data-sku-9999",
+    "question": "What is the inventory for SKU-9999?",
+    "expected_facts": ["no"],
+    "reference_answer": "There is no inventory record for SKU-9999 in the database."
+  }
+]
