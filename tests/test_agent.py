@@ -1,8 +1,9 @@
-'''Tests for the LangGraph agent wiring in ``app.agent``.
+'''Tests for the agent layer in ``app.agent``.
 
-The graph-structure and routing tests need no network. ``call_tools``
-executes the real tools, so those cases hit the live ``supply_chain``
-database and are skipped when it is unreachable.
+Scope is limited to behaviour that belongs to the agent itself: conditional
+routing, graph construction, the tool registry, and how ``call_tools``
+dispatches and wraps tool results. The tools' own output is covered by the
+``test_get_*`` modules and is not re-checked here.
 '''
 
 import json
@@ -13,22 +14,6 @@ from langgraph.graph import END
 
 from app.agent.graph import build_graph, should_continue
 from app.agent.nodes import TOOLS, call_tools
-from app.db.connection import get_connection
-
-
-def _database_available() -> bool:
-    try:
-        conn = get_connection()
-    except Exception:
-        return False
-    conn.close()
-    return True
-
-
-requires_database = pytest.mark.skipif(
-    not _database_available(),
-    reason='supply_chain database is not reachable',
-)
 
 
 def _tool_call(name: str, args: dict, call_id: str = 'call_1') -> dict:
@@ -36,10 +21,10 @@ def _tool_call(name: str, args: dict, call_id: str = 'call_1') -> dict:
 
 
 # --------------------------------------------------------------------------- #
-# routing
+# should_continue
 # --------------------------------------------------------------------------- #
 
-def test_should_continue_routes_to_tools_when_tool_calls_present():
+def test_should_continue_routes_to_tools_when_the_model_requests_one():
     message = AIMessage(
         content='',
         tool_calls=[_tool_call('get_inventory', {'sku': 'SKU-0001'})],
@@ -48,27 +33,22 @@ def test_should_continue_routes_to_tools_when_tool_calls_present():
     assert should_continue({'messages': [message]}) == 'tools'
 
 
-def test_should_continue_ends_on_plain_response():
-    message = AIMessage(content='Here is your answer.')
-
-    assert should_continue({'messages': [message]}) == END
-
-
-def test_should_continue_ends_on_human_message():
+def test_should_continue_ends_when_the_last_message_has_no_tool_calls():
+    assert should_continue({'messages': [AIMessage(content='Done.')]}) == END
     assert should_continue({'messages': [HumanMessage(content='hi')]}) == END
 
 
 # --------------------------------------------------------------------------- #
-# graph structure
+# graph / registry
 # --------------------------------------------------------------------------- #
 
-def test_build_graph_compiles_with_agent_and_tools_nodes():
+def test_build_graph_wires_the_agent_and_tools_nodes():
     graph = build_graph()
 
     assert {'agent', 'tools'} <= set(graph.get_graph().nodes)
 
 
-def test_registered_tools_match_expected_names():
+def test_tool_registry_exposes_the_five_supply_chain_tools():
     assert sorted(tool.name for tool in TOOLS) == [
         'get_inventory',
         'get_purchase_orders',
@@ -82,26 +62,7 @@ def test_registered_tools_match_expected_names():
 # call_tools
 # --------------------------------------------------------------------------- #
 
-@requires_database
-def test_call_tools_executes_requested_tool_against_database():
-    message = AIMessage(
-        content='',
-        tool_calls=[_tool_call('get_supplies', {'sku': 'SKU-0001'})],
-    )
-
-    result = call_tools({'messages': [message]})
-
-    (tool_message,) = result['messages']
-    assert tool_message['role'] == 'tool'
-    assert tool_message['tool_call_id'] == 'call_1'
-
-    payload = json.loads(tool_message['content'])
-    assert payload['supplies'][0]['supply_name'] == 'Standard Resin'
-    assert payload['supplies'][0]['category'] == 'Hardware'
-
-
-@requires_database
-def test_call_tools_handles_multiple_tool_calls():
+def test_call_tools_dispatches_and_wraps_each_result_as_a_tool_message(database):
     message = AIMessage(
         content='',
         tool_calls=[
@@ -110,12 +71,15 @@ def test_call_tools_handles_multiple_tool_calls():
         ],
     )
 
-    result = call_tools({'messages': [message]})
+    messages = call_tools({'messages': [message]})['messages']
 
-    assert [m['tool_call_id'] for m in result['messages']] == ['a', 'b']
+    assert [m['role'] for m in messages] == ['tool', 'tool']
+    assert [m['tool_call_id'] for m in messages] == ['a', 'b']
+    # content is the JSON-serialised tool result, ready to hand back to the model.
+    assert all(isinstance(json.loads(m['content']), dict) for m in messages)
 
 
-def test_call_tools_raises_on_unknown_tool():
+def test_call_tools_raises_on_an_unregistered_tool():
     message = AIMessage(
         content='',
         tool_calls=[_tool_call('get_weather', {'city': 'Denver'})],

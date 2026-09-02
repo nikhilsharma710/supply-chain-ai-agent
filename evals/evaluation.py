@@ -9,10 +9,10 @@ result.
 
 Requires ``OPENAI_API_KEY`` and a reachable ``supply_chain`` database.
 
-Run directly:
+Run from the repository root:
 
-    python -m tests.evaluations.evaluation
-    python -m tests.evaluations.evaluation --verbose
+    python -m evals.evaluation
+    python -m evals.evaluation --verbose
 
 Exits non-zero if any case fails, so it can gate CI.
 '''
